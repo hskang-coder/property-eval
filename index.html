@@ -41,6 +41,9 @@ h1{font-size:20px;font-weight:500;margin-bottom:1.5rem;color:#1a1a18}
 .warn-box{margin-top:1rem;padding:10px 12px;border-radius:8px;font-size:13px;display:none;background:#FFEBEE;color:#B71C1C}
 .btn-reset{margin-top:.75rem;width:100%;padding:10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:transparent;color:#1a1a18;font-size:14px;cursor:pointer;font-family:inherit}
 .btn-reset:hover{background:rgba(0,0,0,0.04)}
+.required-mark{color:#B71C1C;margin-left:2px;font-size:13px}
+.meta input.field-error{border-color:#E53935;background:#FFEBEE}
+.meta input.field-error:focus{outline:none;border-color:#E53935;box-shadow:0 0 0 2px rgba(229,57,53,0.15)}
 .btn-save{width:100%;padding:12px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;margin-top:.5rem;transition:opacity .15s;font-family:inherit}
 .btn-save:hover{opacity:.85}
 .btn-save:disabled{opacity:.45;cursor:not-allowed}
@@ -61,8 +64,8 @@ h1{font-size:20px;font-weight:500;margin-bottom:1.5rem;color:#1a1a18}
 <div class="section">
   <div class="sec-title">기본 정보</div>
   <div class="meta">
-    <div><label>계약번호</label><input type="text" id="contract_no" placeholder="예) 00000"></div>
-    <div><label>임차인명</label><input type="text" id="tenant_name" placeholder="이름"></div>
+    <div><label>계약번호<span class="required-mark">*</span></label><input type="text" id="contract_no" placeholder="예) 00000"></div>
+    <div><label>임차인명<span class="required-mark">*</span></label><input type="text" id="tenant_name" placeholder="이름"></div>
     <div><label>호실</label><input type="text" id="room" placeholder="예) 304호"></div>
     <div><label>기록담당자</label><input type="text" id="manager" placeholder="이름"></div>
     <div><label>방문일</label><input type="date" id="visit_date"></div>
@@ -319,6 +322,21 @@ function getLabel(name){
 }
 
 function calc(){
+  // 필수 입력 항목 검사
+  const contractNoEl=document.getElementById('contract_no');
+  const tenantNameEl=document.getElementById('tenant_name');
+  const contractNo=contractNoEl.value.trim();
+  const tenantName=tenantNameEl.value.trim();
+  contractNoEl.classList.remove('field-error');
+  tenantNameEl.classList.remove('field-error');
+  const missingRequired=[];
+  if(!contractNo){missingRequired.push('계약번호');contractNoEl.classList.add('field-error');}
+  if(!tenantName){missingRequired.push('임차인명');tenantNameEl.classList.add('field-error');}
+  if(missingRequired.length>0){
+    alert('필수 입력 항목을 입력해 주세요: '+missingRequired.join(', '));
+    if(!contractNo){contractNoEl.focus();}else{tenantNameEl.focus();}
+    return;
+  }
   const env=[getVal('env1'),getVal('env2'),getVal('env3'),getVal('env4'),getVal('env5')];
   const ext=[getVal('ext1'),getVal('ext2'),getVal('ext3'),getVal('ext4')];
   const int_=[getVal('int1'),getVal('int2'),getVal('int3'),getVal('int4')];
@@ -449,6 +467,7 @@ function saveToSheet(){
 function resetForm(){
   document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
   document.querySelectorAll('input[type=text], input[type=date]').forEach(i=>i.value='');
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
   document.getElementById('result-box').style.display='none';
   document.getElementById('btn-save').disabled=false;
   document.getElementById('btn-save').textContent='구글 시트에 저장하기';
